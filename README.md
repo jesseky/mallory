@@ -3,8 +3,9 @@ HTTP/HTTPS proxy over SSH.
 
 
 ## Installation
-* Local machine: `go get github.com/jesseky/mallory`
-* Remote server: need our old friend sshd
+```
+go get github.com/jesseky/mallory
+```
 
 
 ## Configueration
@@ -42,7 +43,7 @@ Content:
 }
 ```
 
-Blocked list in config file will be reloaded automatically when updated, and you can do it manually:
+Blocked list in config file won't be reloaded automatically when updated, and you must do it manually:
 ```
 # send signal to reload
 kill -USR2 <pid of mallory>
