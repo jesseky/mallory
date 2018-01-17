@@ -3,7 +3,7 @@ HTTP/HTTPS proxy over SSH.
 
 
 ## Installation
-* Local machine: `go get github.com/justmao945/mallory/cmd/mallory`
+* Local machine: `go get github.com/jesseky/mallory`
 * Remote server: need our old friend sshd
 
 
@@ -62,10 +62,10 @@ mallory -suffix www.google.com
 
 ### A simple command to forward all traffic for the given port
 ```sh
-# install it: go get github.com/justmao945/mallory/cmd/forward
+# install it: I merged forward command to mallory, use mallory -forwardmode to start it 
 
 # all traffic through port 20022 will be forwarded to destination.com:22
-forward -network tcp -listen :20022 -forward destination.com:22
+mallory -forwardmode -network tcp -listen :20022 -forward destination.com:22
 
 # you can ssh to destination:22 through localhost:20022
 ssh root@localhost -p 20022
