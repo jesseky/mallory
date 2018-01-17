@@ -5,12 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"sort"
 	"sync"
 	"syscall"
-
-	"gopkg.in/fsnotify.v1"
 )
 
 // ConfigFile Memory representation for mallory.json
@@ -60,8 +57,6 @@ type Config struct {
 	Path string
 	// config file content
 	File *ConfigFile
-	// File wather
-	Watcher *fsnotify.Watcher
 	// mutex for config file
 	sync.RWMutex
 	loaded bool
@@ -69,15 +64,9 @@ type Config struct {
 
 // NewConfig
 func NewConfig(path string) (self *Config, err error) {
-	// watch config file changes
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		return
-	}
 
 	self = &Config{
-		Path:    os.ExpandEnv(path),
-		Watcher: watcher,
+		Path: os.ExpandEnv(path),
 	}
 	err = self.Load()
 	return
@@ -109,27 +98,6 @@ func (self *Config) Load() (err error) {
 	if err != nil {
 		return
 	}
-
-	// Watching the whole directory instead of the individual path.
-	// Because many editors won't write to file directly, they copy
-	// the original one and rename it.
-	err = self.Watcher.Add(filepath.Dir(self.Path))
-	if err != nil {
-		return
-	}
-
-	go func() {
-		for {
-			select {
-			case event := <-self.Watcher.Events:
-				if event.Op&fsnotify.Write == fsnotify.Write && event.Name == self.Path {
-					self.Reload()
-				}
-			case err := <-self.Watcher.Errors:
-				L.Printf("Watching failed: %s\n", err)
-			}
-		}
-	}()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGHUP)

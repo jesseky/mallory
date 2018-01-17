@@ -31,18 +31,6 @@
 			"path": "golang.org/x/net/publicsuffix",
 			"revision": "0c607074acd38c5f23d1344dfe74c977464d1257",
 			"revisionTime": "2016-05-21T00:18:04Z"
-		},
-		{
-			"checksumSHA1": "7m8j8FsHxLNZh20zNk2bHLVvX0w=",
-			"path": "golang.org/x/sys/unix",
-			"revision": "fff93fa7cd278d84afc205751523809c464168ab",
-			"revisionTime": "2018-01-12T09:54:32Z"
-		},
-		{
-			"checksumSHA1": "RWMTcZkTf3aZaklWxAEY94fFehM=",
-			"path": "gopkg.in/fsnotify.v1",
-			"revision": "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9",
-			"revisionTime": "2018-01-10T05:33:47Z"
 		}
 	],
 	"rootPath": "github.com/jesseky/mallory"
