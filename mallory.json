@@ -1,0 +1,22 @@
+{
+  "id_rsa": "$HOME/.ssh/id_rsa",
+  "local_smart": "127.0.0.1:1315",
+  "local_normal":"127.0.0.1:1316",
+  "remote": "ssh://jianjun@linode:22",
+  "blocked": [
+    "amazonaws.com",
+    "angularjs.io",
+    "angularjs.org",
+    "awsstatic.com",
+    "golang.org",
+    "google.com",
+    "google.co.jp",
+    "googleapis.com",
+    "googleusercontent.com",
+    "google-analytics.com",
+    "gstatic.com",
+    "sourceforge.net",
+    "twitter.com",
+    "youtube.com"
+  ]
+}
