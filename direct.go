@@ -22,13 +22,10 @@ type Direct struct {
 }
 
 // Create and initialize
-func NewDirect(shouldProxyTimeout time.Duration) *Direct {
-	if shouldProxyTimeout == 0 {
-		shouldProxyTimeout = 200 * time.Millisecond
-	}
+func NewDirect(sshTimeoutSecond int) *Direct {
 	tr := http.DefaultTransport.(*http.Transport)
 	tr.Dial = (&net.Dialer{
-		Timeout: shouldProxyTimeout,
+		Timeout: time.Second * time.Duration((map[bool]int{true: sshTimeoutSecond, false: 5})[sshTimeoutSecond > 0]),
 	}).Dial
 	return &Direct{Tr: tr}
 }

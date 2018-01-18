@@ -21,7 +21,7 @@ type ConfigFile struct {
 	// remote addr to connect, e.g. ssh://user@linode.my:22
 	RemoteServer string `json:"remote"`
 	// direct to proxy dial timeout
-	ShouldProxyTimeoutMS int `json:"should_proxy_timeout_ms"`
+	SSHDialTimeoutSecond int `json:"ssh_dial_timeout_second"`
 	// blocked host list
 	BlockedList []string `json:"blocked"`
 }

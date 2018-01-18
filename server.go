@@ -2,31 +2,16 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 	"sync"
-	"time"
 
 	"golang.org/x/net/publicsuffix"
 )
 
-const (
-	SmartSrv = iota
-	NormalSrv
-)
-
-type AccessType bool
-
-func (t AccessType) String() string {
-	if t {
-		return "PROXY"
-	} else {
-		return "DIRECT"
-	}
-}
-
 type Server struct {
 	// SmartSrv or NormalSrv
-	Mode int
 	// config file
 	Cfg *Config
 	// direct fetcher
@@ -40,18 +25,14 @@ type Server struct {
 }
 
 // Create and intialize
-func NewServer(mode int, c *Config) (self *Server, err error) {
+func NewServer(c *Config) (self *Server, err error) {
 	ssh, err := NewSSH(c)
 	if err != nil {
 		return
 	}
-
-	shouldProxyTimeout := time.Millisecond * time.Duration(c.File.ShouldProxyTimeoutMS)
-
 	self = &Server{
-		Mode:         mode,
 		Cfg:          c,
-		Direct:       NewDirect(shouldProxyTimeout),
+		Direct:       NewDirect(c.File.SSHDialTimeoutSecond),
 		SSH:          ssh,
 		BlockedHosts: make(map[string]bool),
 	}
@@ -108,13 +89,13 @@ func (self *Server) Blocked(host string) bool {
 //      GET /justmao945/... HTTP/1.1
 //    Because we can be sure that all of them are http request, we can only redo the request
 //    to the remote server and copy the reponse to client.
-//
+// ServeHTTP http handle
 func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	use := (self.Blocked(r.URL.Host) || self.Mode == NormalSrv) && r.URL.Host != ""
-	L.Printf("[%s] %s %s %s\n", AccessType(use), r.Method, r.RequestURI, r.Proto)
-
+	lAddr := fmt.Sprintf("%s", r.Context())
+	proxy := (self.Blocked(r.URL.Host) || strings.Contains(lAddr, fmt.Sprintf(`&http.Server{Addr:"%s"`, self.Cfg.File.LocalNormalServer))) && len(r.URL.Host) > 0
+	L.Printf("[%s] %s %s %s\n", (map[bool]string{true: "PROXY", false: "DIRECT"})[proxy], r.Method, r.RequestURI, r.Proto)
 	if r.Method == "CONNECT" {
-		if use {
+		if proxy {
 			self.SSH.Connect(w, r)
 		} else {
 			err := self.Direct.Connect(w, r)
@@ -126,7 +107,7 @@ func (self *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// This is an error if is not empty on Client
 		r.RequestURI = ""
 		RemoveHopHeaders(r.Header)
-		if use {
+		if proxy {
 			self.SSH.ServeHTTP(w, r)
 		} else {
 			err := self.Direct.ServeHTTP(w, r)

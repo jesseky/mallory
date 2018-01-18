@@ -94,29 +94,19 @@ func serve() {
 		L.Fatalln(err)
 	}
 
-	L.Printf("Connecting remote SSH server: %s\n", c.File.RemoteServer)
-
-	wait := make(chan int)
-	go func() {
-		normal, err := NewServer(NormalSrv, c)
-		if err != nil {
-			L.Fatalln(err)
-		}
-		L.Printf("Local normal HTTP proxy: %s\n", c.File.LocalNormalServer)
-		L.Fatalln(http.ListenAndServe(c.File.LocalNormalServer, normal))
-		wait <- 1
-	}()
+	//简化， 只启动一个ssh连接
+	server, err := NewServer(c)
+	if err != nil {
+		L.Fatalln(err)
+	}
+	L.Printf("Connecting remote SSH server: %s OK\n", c.File.RemoteServer)
 
 	go func() {
-		smart, err := NewServer(SmartSrv, c)
-		if err != nil {
-			L.Fatalln(err)
-		}
 		L.Printf("Local smart HTTP proxy: %s\n", c.File.LocalSmartServer)
-		L.Fatalln(http.ListenAndServe(c.File.LocalSmartServer, smart))
-		wait <- 1
+		L.Fatalln(http.ListenAndServe(c.File.LocalSmartServer, server))
 	}()
-	<-wait
+	L.Printf("Local normal HTTP proxy: %s\n", c.File.LocalNormalServer)
+	L.Fatalln(http.ListenAndServe(c.File.LocalNormalServer, server))
 }
 
 func printSuffix() {
